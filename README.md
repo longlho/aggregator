@@ -5,6 +5,7 @@ Search aggregator that fetches from Google, Bing & Yahoo. It also zips the resul
 
 - You'll need [node.js](http://nodejs.org/)
 - `npm install`
+- `node index.js`
 
 ## Development Instructions
 

@@ -25,6 +25,7 @@ function search (kw) {
   });
 }
 
+// Only support GET, cause POST/PUT/DELETE don't apply here.
 app.get('/search', function (req, res) {
   var kw = req.query.q;
   return Promise.all(search(kw))
