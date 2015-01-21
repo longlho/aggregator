@@ -1,0 +1,12 @@
+{
+    "laxcomma": true,
+    "globalstrict": true,
+    "strict": true,
+    "expr": true,
+    "undef": true,
+    "unused": true,
+    "multistr": true,
+    "newcap": false,
+    "scripturl": true,
+    "node": true
+}

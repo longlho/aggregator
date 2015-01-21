@@ -1,0 +1,27 @@
+{
+  "name": "aggregator",
+  "version": "0.1.0",
+  "description": "Search engine aggregator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/longlho/aggregator.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/longlho/aggregator/issues"
+  },
+  "homepage": "https://github.com/longlho/aggregator",
+  "dependencies": {
+    "bluebird": "^2.8.2",
+    "cheerio": "^0.18.0",
+    "express": "^4.11.1",
+    "request": "^2.51.0",
+    "sprintf": "^0.1.5",
+    "underscore": "^1.7.0"
+  }
+}
