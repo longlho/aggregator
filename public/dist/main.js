@@ -84,7 +84,6 @@ dom.$searchInput = document.getElementById('search');
 dom.$searchArea  = document.getElementById('search-results');
 dom.$paginators  = document.getElementById('paginators');
 
-
 /**
  * State change handler
  */
@@ -115,12 +114,20 @@ dom.$pages.forEach(function (page) {
 
 // Attach event handler to search input to re-search when a key is pressed
 utils.addEventListener(dom.$searchInput, 'keyup', function (e) {
-  state.query = e.target.value;
+  var query = e.target.value;
 
-  if (!state.query) {
+  // Don't search if it's blank
+  if (!query) {
     dom.$searchArea.innerHTML = '';
     return;
   }
+
+  // Don't re-search if it's the same query
+  if (state.query === query) {
+    return;
+  }
+
+  state.query = query;
 
   dom.$searchArea.innerHTML = 'Searching...';
 
