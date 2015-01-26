@@ -8,9 +8,6 @@
     document.write('<script type="text/javascript" src="' + sourcePath + '"></script>');
   }
 
-  // Polyfill classList (<=IE9)
-  !("classList" in document.createElement("_")) && importScript('classlist/2014.01.31/classList.min.js');
-
   // Polyfill getElementsByClassName (IE8)
   if (!document.getElementsByClassName) {
     window.Element.prototype.getElementsByClassName = document.constructor.prototype.getElementsByClassName = function (classNames) {
@@ -30,11 +27,5 @@
     importScript('es5-shim/4.0.5/es5-shim.min.js');
     importScript('es5-shim/4.0.5/es5-sham.min.js');
   }
-
-  // Polyfill Promise (IE) (modded to polyfill automatically)
-  // See: https://github.com/jakearchibald/es6-promise/issues/59
-  // if (!(window.Promise && !window.Promise.cast)) {
-  //   importScript('es6-promise-2.0.1.modded.min.js');
-  // }
 
 })(window, document);

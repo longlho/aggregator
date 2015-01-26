@@ -4,7 +4,7 @@ var BaseParser = require('./Base')
   , util = require('util');
 
 function Yahoo () {
-  BaseParser.call(this, 'yahoo', 'http://search.yahoo.com/search?q=%s');
+  BaseParser.call(this, 'yahoo', 'http://search.yahoo.com/search?q=%s&pstart=%s');
 }
 
 util.inherits(Yahoo, BaseParser);

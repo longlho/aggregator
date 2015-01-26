@@ -5,4 +5,6 @@ ul {
 
 ul li {
   list-style: none;
+  border-bottom: 1px solid #AAA;
+  margin-bottom: 10px;
 }

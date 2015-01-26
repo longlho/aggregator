@@ -4,7 +4,7 @@ var BaseParser = require('./Base')
   , util = require('util');
 
 function Bing () {
-  BaseParser.call(this, 'bing', 'http://www.bing.com/search?q=%s');
+  BaseParser.call(this, 'bing', 'http://www.bing.com/search?q=%s&first=%s');
 }
 
 util.inherits(Bing, BaseParser);

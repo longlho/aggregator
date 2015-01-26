@@ -1,8 +1,16 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var TIMEOUT = 300;
+// Timeout to debounce
+var TIMEOUT = 333;
 
+/**
+ * Fetch search result from server based on query
+ * @param  {String} query Keywords to search for
+ * @param  {Object} opts  Options
+ * @param  {Number} opts.page Page (for pagination)
+ * @param  {Function} opts.cb Callback function
+ */
 exports.search = function (query, opts) {
   opts || (opts = {});
 
@@ -13,10 +21,10 @@ exports.search = function (query, opts) {
 
   params = {
     q: query,
-    offset: opts.offset,
-    limit: opts.limit
+    page: (+opts.page - 1) || 0
   };
 
+  // Serialized query string params
   url += Object.keys(params)
     .map(function (k) {
       return k + '=' + encodeURIComponent(params[k]);
@@ -29,6 +37,7 @@ exports.search = function (query, opts) {
     if (this.readyState === 4) {
       if (this.status >= 200 && this.status < 400) {
         // Success!
+        // JSON parse this since we assume API provides JSON
         return cb(null, JSON.parse(this.responseText));
       } else {
         return cb(new Error('Non-200 response from server'));
@@ -40,6 +49,9 @@ exports.search = function (query, opts) {
   request = null;
 };
 
+/**
+ * Debounced search function that only fires every `TIMEOUT
+ */
 exports.debouncedSearch = (function () {
 
   var timeoutId;
@@ -61,28 +73,58 @@ exports.debouncedSearch = (function () {
 },{}],2:[function(require,module,exports){
 'use strict';
 
-var utils = require('./utils')
-  , renderer = require('./renderer')
-  , driver = require('./driver');
+var utils        = require('./utils')
+  , renderer     = require('./renderer')
+  , driver       = require('./driver')
+  , state        = window.state = {}
+  , dom          = window.dom = {};
 
-var $searchInput = document.getElementById('search')
-  , $searchArea  = document.getElementById('search-results');
+// Find our key DOM elements
+dom.$searchInput = document.getElementById('search');
+dom.$searchArea  = document.getElementById('search-results');
+dom.$paginators  = document.getElementById('paginators');
 
-utils.addEventListener($searchInput, 'keyup', function (e) {
-  var query = e.target.value;
 
-  if (!query) {
-    $searchArea.innerHTML = '';
+/**
+ * State change handler
+ */
+function onStateChange() {
+  driver.debouncedSearch(state.query, {
+    page: state.page,
+    cb: function (err, data) {
+      dom.$searchArea.innerHTML = renderer.renderSearchResults(data);
+    }
+  });
+}
+
+// Render default paginators
+dom.$paginators.innerHTML = renderer.renderPaginators();
+
+// Since `getElementsByClassName` does not return a real Array
+dom.$pages = Array.prototype.slice.call(dom.$paginators.getElementsByClassName('page'));
+
+// Attach event handler to paginator
+dom.$pages.forEach(function (page) {
+  utils.addEventListener(page, 'click', function (e) {
+    state.page = +e.target.textContent || e.target.innerText;
+
+    onStateChange();
+  });
+});
+
+
+// Attach event handler to search input to re-search when a key is pressed
+utils.addEventListener(dom.$searchInput, 'keyup', function (e) {
+  state.query = e.target.value;
+
+  if (!state.query) {
+    dom.$searchArea.innerHTML = '';
     return;
   }
 
-  $searchArea.innerHTML = 'Searching...';
+  dom.$searchArea.innerHTML = 'Searching...';
 
-  driver.debouncedSearch(query, {
-    cb: function (err, data) {
-      $searchArea.innerHTML = renderer.render(data);
-    }
-  });
+  onStateChange();
 });
 
 
@@ -92,7 +134,7 @@ utils.addEventListener($searchInput, 'keyup', function (e) {
 
 var ROW_TMPL = " \
   <li> \
-    <a href=\"{{ url }}\">{{ title }}</a> \
+    <a href=\"{{ link }}\" target=\"_blank\">{{ title }}</a> \
     <p>{{ url }}</p> \
     <p>{{ description }}</p> \
     <p>Powered By: {{ poweredBy }}</p> \
@@ -101,6 +143,10 @@ var ROW_TMPL = " \
 
 var RESULTS_TMPL = " \
   <ul>{{ results }}</ul> \
+  ";
+
+var PAGINATOR_TMPL = " \
+  <a class=\"page\" href=\"javascript:void(0)\">{{ num }}</a> \
   ";
 
 var TMPL_REGEX = /\{\{\s*([\w\.]+)\s*\}\}/gi;
@@ -151,14 +197,35 @@ exports.renderTemplate = function (tmpl, data) {
  * @param  {Object[]} results List of results
  * @return {String}         rendered string
  */
-exports.render = function (results) {
+exports.renderSearchResults = function (results) {
   var rows = results.map(function (r) {
+    // Normalize r.url since some services return w/ http(s)
+    r.link = r.url;
+    if (r.link.substr(0, 4) !== 'http') {
+      r.link = '//' + r.url;
+    }
     return exports.renderTemplate(ROW_TMPL, r);
   });
 
   return exports.renderTemplate(RESULTS_TMPL, {
     results: rows.join('')
   });
+};
+
+/**
+ * Render paginators from page `start` to page `end`
+ * @param  {Number} start Start page
+ * @param  {Number} end   End page
+ * @return {String} Rendered paginator
+ */
+exports.renderPaginators = function (start, end) {
+  start || (start = 0);
+  end || (end = 10);
+  var paginator = [];
+  for (var i = start; i < end; i++) {
+    paginator.push(exports.renderTemplate(PAGINATOR_TMPL, { num: i + 1 }));
+  }
+  return paginator.join('');
 };
 
 },{}],4:[function(require,module,exports){

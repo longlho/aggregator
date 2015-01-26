@@ -4,7 +4,7 @@ var BaseParser = require('./Base')
   , util = require('util');
 
 function Google () {
-  BaseParser.call(this, 'google', 'http://www.google.com/search?q=%s');
+  BaseParser.call(this, 'google', 'http://www.google.com/search?q=%s&start=%s');
 }
 
 util.inherits(Google, BaseParser);

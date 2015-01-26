@@ -25,9 +25,9 @@ BaseParser.prototype.DESC_SELECTOR = '';
  * @param  {String} kw Keywords
  * @return {Promise<Object[]>}    Promise containing the results
  */
-BaseParser.prototype.fetch = function (kw) {
+BaseParser.prototype.fetch = function (kw, page) {
   var self = this
-    , url = sprintf(this.pattern, encodeURIComponent(kw));
+    , url = sprintf(this.pattern, encodeURIComponent(kw), page * 10);
 
   return request(url)
     .spread(function (resp, body) {

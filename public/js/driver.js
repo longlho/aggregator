@@ -1,7 +1,15 @@
 'use strict';
 
-var TIMEOUT = 300;
+// Timeout to debounce
+var TIMEOUT = 333;
 
+/**
+ * Fetch search result from server based on query
+ * @param  {String} query Keywords to search for
+ * @param  {Object} opts  Options
+ * @param  {Number} opts.page Page (for pagination)
+ * @param  {Function} opts.cb Callback function
+ */
 exports.search = function (query, opts) {
   opts || (opts = {});
 
@@ -12,10 +20,10 @@ exports.search = function (query, opts) {
 
   params = {
     q: query,
-    offset: opts.offset,
-    limit: opts.limit
+    page: (+opts.page - 1) || 0
   };
 
+  // Serialized query string params
   url += Object.keys(params)
     .map(function (k) {
       return k + '=' + encodeURIComponent(params[k]);
@@ -28,6 +36,7 @@ exports.search = function (query, opts) {
     if (this.readyState === 4) {
       if (this.status >= 200 && this.status < 400) {
         // Success!
+        // JSON parse this since we assume API provides JSON
         return cb(null, JSON.parse(this.responseText));
       } else {
         return cb(new Error('Non-200 response from server'));
@@ -39,6 +48,9 @@ exports.search = function (query, opts) {
   request = null;
 };
 
+/**
+ * Debounced search function that only fires every `TIMEOUT
+ */
 exports.debouncedSearch = (function () {
 
   var timeoutId;

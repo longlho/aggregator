@@ -2,7 +2,7 @@
 
 var ROW_TMPL = " \
   <li> \
-    <a href=\"{{ url }}\">{{ title }}</a> \
+    <a href=\"{{ link }}\" target=\"_blank\">{{ title }}</a> \
     <p>{{ url }}</p> \
     <p>{{ description }}</p> \
     <p>Powered By: {{ poweredBy }}</p> \
@@ -11,6 +11,10 @@ var ROW_TMPL = " \
 
 var RESULTS_TMPL = " \
   <ul>{{ results }}</ul> \
+  ";
+
+var PAGINATOR_TMPL = " \
+  <a class=\"page\" href=\"javascript:void(0)\">{{ num }}</a> \
   ";
 
 var TMPL_REGEX = /\{\{\s*([\w\.]+)\s*\}\}/gi;
@@ -61,12 +65,33 @@ exports.renderTemplate = function (tmpl, data) {
  * @param  {Object[]} results List of results
  * @return {String}         rendered string
  */
-exports.render = function (results) {
+exports.renderSearchResults = function (results) {
   var rows = results.map(function (r) {
+    // Normalize r.url since some services return w/ http(s)
+    r.link = r.url;
+    if (r.link.substr(0, 4) !== 'http') {
+      r.link = '//' + r.url;
+    }
     return exports.renderTemplate(ROW_TMPL, r);
   });
 
   return exports.renderTemplate(RESULTS_TMPL, {
     results: rows.join('')
   });
+};
+
+/**
+ * Render paginators from page `start` to page `end`
+ * @param  {Number} start Start page
+ * @param  {Number} end   End page
+ * @return {String} Rendered paginator
+ */
+exports.renderPaginators = function (start, end) {
+  start || (start = 0);
+  end || (end = 10);
+  var paginator = [];
+  for (var i = start; i < end; i++) {
+    paginator.push(exports.renderTemplate(PAGINATOR_TMPL, { num: i + 1 }));
+  }
+  return paginator.join('');
 };
