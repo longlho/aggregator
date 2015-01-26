@@ -3,8 +3,8 @@
 var utils        = require('./utils')
   , renderer     = require('./renderer')
   , driver       = require('./driver')
-  , state        = window.state = {}
-  , dom          = window.dom = {};
+  , state        = {}
+  , dom          = {};
 
 // Find our key DOM elements
 dom.$searchInput = document.getElementById('search');
